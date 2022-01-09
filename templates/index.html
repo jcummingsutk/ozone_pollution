@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Title </title>
+</head>
+
+<body>
+  <h1> Title </h1>
+  <p>
+    Enter the required information below to obtain a prediction on whether you have diabetes or not. Here are some realistic
+    values in case you do not know some inputs and want to test it:
+  </p>
+  <p>
+    pregnancies: 3
+  </p>
+  <p>
+    glucose (mmoL/L): 121
+  </p>
+  <p>
+    diastolic blood pressure (mmHg): 70
+  </p>
+  <p>
+    insulin level (mu U/ml): 79
+  </p>
+  <p>
+    bmi (weight in kg/(height in m)^2): 32
+  </p>
+  <p>
+    diabetes pedigree function: .472
+  </p>
+  <p>
+    age: 33
+  </p>
+    <form action="/" method="POST">
+      <input type="number" step="any" name="pregnancies" placeholder="num pregnancies">
+      <input type="number" step="any" name="glucose" placeholder="glucose level">
+      <input type="number" step="any" name="blood_pressure" placeholder="diastolic blood pressure">
+      <input type="number" step="any" name="insulin" placeholder="insulin level">
+      <input type="number" step="any" name="bmi" placeholder="bmi">
+      <input type="number" step="any" name="diabetespedigreefunction" placeholder="diabetes pedgiree function">
+      <input type="number" step="any" name="age" placeholder="age">
+
+      <input type="submit">
+    </form>
+
+
+  <p>
+    {{prediction}}
+  </p>
+
+</body>
