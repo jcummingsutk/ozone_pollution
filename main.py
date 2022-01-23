@@ -124,7 +124,7 @@ if __name__ == "__main__":
         "temp": 110,
         "humidity": 0,
         "windspeed": 0,
-        "month": 6,
+        "month": 7,
         "sea_level_pressure": 1020.8,
         "hour": 18,
         "is_weekend": 1
