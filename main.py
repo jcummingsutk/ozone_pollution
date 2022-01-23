@@ -101,16 +101,16 @@ def predict(input_dict):
     input_series_num = pd.DataFrame.from_dict(input_dict_num)
     input_series_cat = pd.DataFrame.from_dict(input_dict_cat)
 
-    print(input_series_num)
+
 
     poly_series = poly_pickle.transform(input_series_num)
     scaled_poly_series = scaler_pickle.transform(poly_series)
     df_poly = pd.DataFrame(scaled_poly_series)
     df_poly.columns = poly_pickle.get_feature_names(input_series_num.columns)
-    print(scaled_poly_series)
+
 
     input_series = pd.concat([df_poly, input_series_cat], axis=1)
-    print(input_series)
+
     prediction = model_pickle.predict(input_series)
     print(prediction)
 
