@@ -55,7 +55,7 @@ def engineer_features(df_col) -> pd.DataFrame:
     return df_col
 
 
-def get_poly_scaled(df, numerical_cols, cat_cols, target_col, n_deg):
+def get_poly_scaled(df:pd.DataFrame, numerical_cols, cat_cols, target_col, n_deg):
     """Takes in a data set, the numerical columns you are interested in, and categorical columns and degree and returns
     the scaled numerical dataset with with polynomial features of degree n_deg, the categorical columns, and the target columns all properly indexed
     Args:

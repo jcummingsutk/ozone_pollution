@@ -5,6 +5,8 @@ import pickle
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 from sklearn import linear_model
+import boto3
+import json
 
 N_DEG = 5
 TEST_FRACTION = 0.25
@@ -15,7 +17,7 @@ N_JOBS = 6
 
 def train_model():
     """
-    train the model
+    train the ridge regression model
     """
     df_weather = load_weather_data()
     df_ozone = load_ozone_data()
@@ -54,8 +56,6 @@ def train_model():
         X, y, test_size=TEST_FRACTION, random_state=RAND_STATE
     )
 
-
-
     alpha = np.linspace(.05, .5, 50)
     ridge_params = {'alpha':alpha}
     reg_ridge = linear_model.Ridge()
@@ -65,7 +65,6 @@ def train_model():
     print(grid_ridge.score(X_train, y_train))
     print_errors(grid_ridge, X_test, y_test)
     pickle.dump(grid_ridge, open("model.pkl", "wb"))
-
 
 def predict(input_dict):
     """ returns the predicted ozone pollution ppm based on input variables
@@ -78,9 +77,14 @@ def predict(input_dict):
         "sea_level_pressure": pressure in millibars
         "hour": hour of the day, 0=midnight, 23 = 11 p.m.
     } """
-    poly_pickle = pickle.load(open("poly.pkl", "rb"))
-    scaler_pickle = pickle.load(open("scaler.pkl", "rb"))
-    model_pickle = pickle.load(open("model.pkl", "rb"))
+    #poly_pickle = pickle.load(open("poly.pkl", "rb"))
+    #scaler_pickle = pickle.load(open("scaler.pkl", "rb"))
+    #model_pickle = pickle.load(open("model.pkl", "rb"))
+
+    s3 = boto3.resource('s3')
+    poly_pickle = pickle.loads(s3.Bucket("ozone-jtc-ml").Object("poly.pkl").get()['Body'].read())
+    scaler_pickle = pickle.loads(s3.Bucket("ozone-jtc-ml").Object("scaler.pkl").get()['Body'].read())
+    model_pickle = pickle.loads(s3.Bucket("ozone-jtc-ml").Object("model.pkl").get()['Body'].read())
 
     hour_x, hour_y = cyclicize(input_dict["hour"], 24)
     month_x, month_y = cyclicize(input_dict["month"], 12)
@@ -112,16 +116,17 @@ def predict(input_dict):
     input_series = pd.concat([df_poly, input_series_cat], axis=1)
 
     prediction = model_pickle.predict(input_series)
-    print(prediction)
+    return prediction
 
 
 # transformed_example = ss.transform([[6, 148, 72, 0, 33.6, 0.627, 50]])
 # make_prediction([[6, 148, 72, 0, 25, 0.627, 50]])
 
 if __name__ == "__main__":
+    #print(predict_lambda(1, 1))
     #train_model()
     input_dictionary = {
-        "temp": 110,
+        "temp": 80,
         "humidity": 0,
         "windspeed": 0,
         "month": 7,
@@ -130,6 +135,8 @@ if __name__ == "__main__":
         "is_weekend": 1
     }
     pred = predict(input_dictionary)
+    print(pred)
+
 
     # print("The test prediction is {}".format(pred))
 
