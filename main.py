@@ -14,7 +14,6 @@ RAND_STATE = 0
 CV = 7
 N_JOBS = 6
 
-
 def train_model():
     """
     train the ridge regression model
@@ -76,15 +75,16 @@ def predict(input_dict):
         "month": the month number, 1= Jan, 12=Dec
         "sea_level_pressure": pressure in millibars
         "hour": hour of the day, 0=midnight, 23 = 11 p.m.
+        "is_weekend": 1 if it is the weekend, 0 if not
     } """
-    #poly_pickle = pickle.load(open("poly.pkl", "rb"))
-    #scaler_pickle = pickle.load(open("scaler.pkl", "rb"))
-    #model_pickle = pickle.load(open("model.pkl", "rb"))
+    poly_pickle = pickle.load(open("poly.pkl", "rb"))
+    scaler_pickle = pickle.load(open("scaler.pkl", "rb"))
+    model_pickle = pickle.load(open("model.pkl", "rb"))
 
-    s3 = boto3.resource('s3')
-    poly_pickle = pickle.loads(s3.Bucket("ozone-jtc-ml").Object("poly.pkl").get()['Body'].read())
-    scaler_pickle = pickle.loads(s3.Bucket("ozone-jtc-ml").Object("scaler.pkl").get()['Body'].read())
-    model_pickle = pickle.loads(s3.Bucket("ozone-jtc-ml").Object("model.pkl").get()['Body'].read())
+    #s3 = boto3.resource('s3')
+    #poly_pickle = pickle.loads(s3.Bucket("ozone-jtc-ml").Object("poly.pkl").get()['Body'].read())
+    #scaler_pickle = pickle.loads(s3.Bucket("ozone-jtc-ml").Object("scaler.pkl").get()['Body'].read())
+    #model_pickle = pickle.loads(s3.Bucket("ozone-jtc-ml").Object("model.pkl").get()['Body'].read())
 
     hour_x, hour_y = cyclicize(input_dict["hour"], 24)
     month_x, month_y = cyclicize(input_dict["month"], 12)
@@ -117,10 +117,6 @@ def predict(input_dict):
 
     prediction = model_pickle.predict(input_series)
     return prediction
-
-
-# transformed_example = ss.transform([[6, 148, 72, 0, 33.6, 0.627, 50]])
-# make_prediction([[6, 148, 72, 0, 25, 0.627, 50]])
 
 if __name__ == "__main__":
     #print(predict_lambda(1, 1))
