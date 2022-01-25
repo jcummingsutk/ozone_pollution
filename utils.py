@@ -13,13 +13,13 @@ def load_ozone_data() -> pd.DataFrame:
     logging.info("Loading Ozone Data")
     file = "data/ozone_2019.csv"
     df = pd.read_csv(file)
-    df.columns = df.columns.str.lower()
+    df.columns = df.columns.str.lower() #lower and strip white space for columns
     df.columns = df.columns.str.strip()
     df = df.loc[(df["county name"] == "Denver") & (df["state name"] == "Colorado")]
     df = df[df["latitude"] == 39.751184]
-    useful_cols = ["date local", "time local", "sample measurement"]
+    useful_cols = ["date local", "time local", "sample measurement"] #get the useful columns in the ozone data
     df = df[useful_cols]
-    df["datetime"] = df["date local"] + " " + df["time local"] + ":00"
+    df["datetime"] = df["date local"] + " " + df["time local"] + ":00" #adjust the datetime column so it is easier to merge with other data
     df["datetime"] = pd.to_datetime(df["datetime"])
     return df
 
@@ -36,7 +36,9 @@ def load_weather_data() -> pd.DataFrame:
 
 def cyclicize(in_series, T):
     """ Transforms a variable into a cylcic variable with period T by
-    doing cos(2pi/T x), sin(2pi/T x). Will work for a series as well as a number"""
+    doing cos(2pi/T x), sin(2pi/T x). Will work for a series as well as a number
+    This is exremely useful for time-variables, where for example the hour can be 0-23
+    but hour 0 is close to 23. Essentially, we are mapping a line segment to a circle."""
 
     cyclic_x = np.cos(2*np.pi/T * in_series)
     cyclic_y = np.sin(2*np.pi/T * in_series)
@@ -44,6 +46,8 @@ def cyclicize(in_series, T):
     return cyclic_x, cyclic_y
 
 def engineer_features(df_col) -> pd.DataFrame:
+    """ Takes in a merged dataset of ozone and weather for colorado and
+    cyclicizes the hour and month vairables as well as classifies each day as weekday or not"""
     df_col["day_of_week"] = df_col["datetime_dt"].dt.dayofweek
     df_col["type of day"] = "weekday"
     weekend_mask = (df_col["day_of_week"] == 5) | (df_col["day_of_week"] == 6)
@@ -55,7 +59,7 @@ def engineer_features(df_col) -> pd.DataFrame:
     return df_col
 
 
-def get_poly_scaled(df:pd.DataFrame, numerical_cols, cat_cols, target_col, n_deg):
+def get_poly_scaled(df, numerical_cols, cat_cols, target_col, n_deg):
     """Takes in a data set, the numerical columns you are interested in, and categorical columns and degree and returns
     the scaled numerical dataset with with polynomial features of degree n_deg, the categorical columns, and the target columns all properly indexed
     Args:
@@ -93,14 +97,14 @@ def get_poly_scaled(df:pd.DataFrame, numerical_cols, cat_cols, target_col, n_deg
 
 
 def get_mae(reg, X, y):
-    """returns the mean average error of the regressor reg on X"""
+    """returns the mean average error of the regressor reg on X with true outputs y"""
     y_pred = reg.predict(X)
     abs_err = np.abs(y_pred - y)
     return abs_err.mean()
 
 
 def get_rmse(reg, X, y):
-    """returns the root mean square error of the regressor reg on X"""
+    """returns the root mean square error of the regressor reg on X with true outputs y"""
     y_pred = reg.predict(X)
     sqr_err = np.power(y_pred - y, 2)
     mse = np.mean(sqr_err)
